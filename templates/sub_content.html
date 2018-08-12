@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Content Management</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0 60px;
+        }
+
+        h1 {
+            border-left: 10px solid #2BA245;
+            padding-left: 10px;
+        }
+
+        form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .input_group {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding-right: 50px;
+            margin-right: 50px;
+            border-right: 1px solid #F1F1F1;
+        }
+
+        .input_group input {
+            width: 18%;
+            margin: 0 2% 1em 0;
+            padding-left: 0.5em;
+            font-size: 16px;
+            outline: none;
+            border: none;
+            border-bottom: 1px solid #333333;
+        }
+
+        .input_group input[name="msg"], .input_group input[name="url"] {
+            width: 36%;
+        }
+
+        .btn_group {
+            flex: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 180px;
+        }
+        .btn_group button {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            background: no-repeat center/60%;
+        }
+
+        .btn_group button:active {
+            background-size: 50%;
+        }
+
+        #btn_add {
+            background-color: #2BA245;
+            background-image: url("{{ url_for('static', filename='src/add.png') }}");
+        }
+
+        #btn_del {
+            background-color: #D84E43;
+            background-image: url("{{ url_for('static', filename='src/del.png') }}");
+        }
+
+        #btn_search {
+            background-color: #2782D7;
+            background-image: url("{{ url_for('static', filename='src/search.png') }}");
+        }
+
+        #btn_edit {
+            background-color: #FFBE00;
+            background-image: url("{{ url_for('static', filename='src/edit.png') }}");
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .title_div {
+            background: #F1F1F1;
+        }
+
+        .content_div {
+            height: fit-content;
+            max-height: 500px;
+            overflow: auto;
+            margin: -1px 0 50px;
+            border-bottom: 1px solid #aaaaaa;
+        }
+
+        .content_div tr:last-of-type td {
+            border-bottom: none;
+        }
+
+        .tr_selected, .content_div tr:hover {
+            background-color: #F1F1F1;
+        }
+
+        td, th {
+            box-sizing: border-box;
+            width: 12.5%;
+            padding: 5px 10px;
+            border: 1px solid #aaaaaa;
+        }
+
+        td:nth-of-type(2), td:nth-of-type(3), th:nth-of-type(2), th:nth-of-type(3) {
+            width: 25%;
+        }
+
+        ::-webkit-scrollbar
+        {
+            width: 0;
+            height: 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Content Management</h1>
+<h2>Edit</h2>
+<form class="edit_section">
+    <div class="input_group">
+        <input type="number" id="id_input" name="id" placeholder="ID">
+        <input type="text" id="msg_input" name="msg" placeholder="Message">
+        <input type="url" id="url_input" name="url" placeholder="URL">
+        <input type="text" id="type_input" name="type" placeholder="Type">
+        <input type="text" id="creator_input" name="creator" placeholder="Creator">
+        <input type="date" id="createtime_input" name="createtime" placeholder="Create time">
+    </div>
+    <div class="btn_group">
+        <button type="button" value="add" id="btn_add"></button>
+        <button type="button" value="del" id="btn_del"></button>
+        <button type="button" value="search" id="btn_search"></button>
+        <button type="button" value="edit" id="btn_edit"></button>
+    </div>
+</form>
+
+<h2>Table</h2>
+<table class="title_div">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Message</th>
+        <th>URL</th>
+        <th>Type</th>
+        <th>Creator</th>
+        <th>Create time</th>
+    </tr>
+    </thead>
+</table>
+<div class="content_div">
+<table>
+    <tbody id="content_tbody"></tbody>
+</table>
+</div>
+<script>
+    var content_tbody = document.querySelector("#content_tbody");
+    var inputs = document.querySelectorAll(".input_group input");
+
+    HTMLTableRowElement.prototype.clearSelected = function () {
+        this.className = this.className.replace(/\str_selected/g, "");
+    }
+
+    /* 用不上的声明
+    var input_id = document.querySelector("input[name='id']"),
+        input_msg = document.querySelector("input[name='msg']"),
+        input_url = document.querySelector("input[name='url']"),
+        input_type = document.querySelector("input[name='type']"),
+        input_creator = document.querySelector("input[name='creator']"),
+        input_createtime = document.querySelector("input[name='createtime']");
+    */
+
+    function firstTimeEditCheck() {
+        var first_row = content_tbody.children[0];
+        if (first_row.children.length == 1) { // 检查第一行表格是否只有一个 td（即，第一行是否为"无数据"）
+            content_tbody.removeChild(first_row);
+        }
+    }
+
+    function addToContent(id, msg, url, type, creator, time) {
+        firstTimeEditCheck();
+        var tr = content_tbody.insertRow();
+        tr.innerHTML = "<td>"+id+"</td><td>"+msg+"</td><td>"+url+"</td><td>"+type+"</td><td>"+creator+"</td><td>"+time+"</td>";
+    }
+
+    function clearContent() {
+        content_tbody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>无数据</td></tr>";
+    }
+
+    var markSelected = (function () {
+        var last_selected = null;
+        return function (tr) {
+            if (last_selected != null) {
+                last_selected.clearSelected();
+            }
+            tr.className += " tr_selected";
+            last_selected = tr;
+        }
+    })();
+
+    content_tbody.onclick = function (e) {
+        if (e.target && e.target.nodeName.toUpperCase() == "TD") {
+            var tr = e.target.parentNode;
+            markSelected(tr);
+            for (let i=0;i<tr.children.length;i++) {
+                inputs[i].value = tr.children[i].innerText;
+            }
+        }
+    }
+
+    // window.onload = function () {
+    //     clearContent();
+    //     for (let i=0;i<50;i++) {
+    //         addToContent(i,i,i,i,i,i);
+    //     }
+    // }
+
+    $(document).ready(function(){
+    $("#btn_add").click(function() {
+        $.post('/manager/add/',
+            {
+                id: $("#id_input").val(),
+                msg: $("#msg_input").val(),
+                url: $("#url_input").val(),
+                type: $("#type_input").val(),
+                creator: $("#creator_input").val(),
+                createtime: $("#createtime_input").val()
+            },
+            function(data, status) {
+                var error_code = data.error_code;
+                if(error_code == "0") {
+                    alert("添加成功");
+                } else {
+                    alert(error_code);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function(){
+    $("#btn_del").click(function() {
+        $.post('/manager/delete/',
+            {
+                id: $("#id_input").val(),
+                msg: $("#msg_input").val(),
+                url: $("#url_input").val(),
+                type: $("#type_input").val(),
+                creator: $("#creator_input").val(),
+                createtime: $("#createtime_input").val()
+            },
+            function(data, status) {
+                var error_code = data.error_code;
+                if(error_code == "0") {
+                    alert("删除成功");
+                } else {
+                    alert(error_code);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function(){
+    $("#btn_edit").click(function() {
+        $.post('/manager/update/',
+            {
+                id: $("#id_input").val(),
+                msg: $("#msg_input").val(),
+                url: $("#url_input").val(),
+                type: $("#type_input").val(),
+                creator: $("#creator_input").val(),
+                createtime: $("#createtime_input").val()
+            },
+            function(data, status) {
+                var error_code = data.error_code;
+                if(error_code == "0") {
+                    alert("更新成功");
+                } else {
+                    alert(error_code);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function(){
+    $("#btn_search").click(function() {
+        $.post('/manager/select/',
+            {
+                id: $("#id_input").val(),
+                msg: $("#msg_input").val(),
+                url: $("#url_input").val(),
+                type: $("#type_input").val(),
+                creator: $("#creator_input").val(),
+                createtime: $("#createtime_input").val()
+            },
+            function(data, status) {
+                var error_code = data.error_code;
+                if(error_code == "0") {
+                    clearContent();
+                    for (var i=0; i<data.record_list.length;i++) {
+                        var id_req = data.record_list[i].id;
+                        var msg_req = data.record_list[i].msg;
+                        var url_req = data.record_list[i].url;
+                        var type_req = data.record_list[i].type;
+                        var creator_req = data.record_list[i].creator;
+                        var createtime_req = data.record_list[i].createtime;
+                        addToContent(id_req, msg_req, url_req, type_req, creator_req, createtime_req);
+                    }
+                } else {
+                    alert(error_code);
+                }
+            });
+        });
+    });
+
+</script>
+</body>
+</html>

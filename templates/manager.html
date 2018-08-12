@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Content Manage</title>
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+        }
+
+        nav {
+            flex: none;
+            width: 60px;
+            padding-top: 30px;
+            background-color: #4D4D4D;
+        }
+
+        nav button {
+            position: relative;
+            display: block;
+            box-sizing: border-box;
+            width: 40px;
+            margin: 0 auto 20px;
+            padding: 0 2px 2px;
+            font-size: 0;
+            border: none;
+            outline: none;
+            background: none;
+        }
+
+        nav button:hover span {
+            display: block;
+        }
+
+        .btn_selected {
+            border-bottom: 3px solid #2BA245;
+            margin-bottom: 17px; /* = 20 - 3，抵消添加下边框造成的变化 */
+        }
+
+        nav button img {
+            width: 30px;
+            height: 30px;
+        }
+
+        nav button span {
+            display: none;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 40px;
+            width: 5em;
+            height: 1.5em;
+            margin: auto 0;
+            font-size: 12px;
+            color: #ffffff;
+            background-color: #2BA245;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <button type="button" id="to_content"><img src="{{ url_for('static', filename='src/content.png') }}"><span>内容管理</span></button>
+    <button type="button" id="to_user"><img src="{{ url_for('static', filename='src/user.png') }}"><span>用户历史记录</span></button>
+</nav>
+<iframe></iframe>
+
+<script>
+    var iframe = document.querySelector("iframe"),
+        buttons = document.querySelectorAll("nav button");
+
+    HTMLButtonElement.prototype.clearSelected = function () {
+        this.className = this.className.replace(/\sbtn_selected/g, "");
+    }
+
+    function goToSubPage(command, iframe) {
+        switch (command) {
+            case "to_content":
+                iframe.src = "sub_content.html";
+                break;
+            case "to_user":
+                iframe.src = "sub_user.html";
+                break;
+        }
+    }
+
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].onclick = function () {
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].clearSelected();
+            }
+            this.className += " btn_selected";
+            goToSubPage(this.id, iframe);
+        }
+    }
+
+    window.onload = function () {
+        buttons[0].click();
+    }
+</script>
+</body>
+</html>
