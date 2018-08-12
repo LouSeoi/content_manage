@@ -200,6 +200,24 @@
         content_tbody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>无数据</td></tr>";
     }
 
+    function onSelect(data, status) {
+        var error_code = data.error_code;
+        if(error_code == "0") {
+            clearContent();
+            for (var i=0; i<data.record_list.length;i++) {
+                var id_req = data.record_list[i].id;
+                var msg_req = data.record_list[i].msg;
+                var url_req = data.record_list[i].url;
+                var type_req = data.record_list[i].type;
+                var creator_req = data.record_list[i].creator;
+                var createtime_req = data.record_list[i].createtime;
+                addToContent(id_req, msg_req, url_req, type_req, creator_req, createtime_req);
+            }
+        } else {
+            alert(error_code);
+        }
+    }
+
     var markSelected = (function () {
         var last_selected = null;
         return function (tr) {
@@ -221,12 +239,13 @@
         }
     }
 
-    // window.onload = function () {
-    //     clearContent();
-    //     for (let i=0;i<50;i++) {
-    //         addToContent(i,i,i,i,i,i);
-    //     }
-    // }
+    window.onload = function () {
+        $.post('/manager/select/',
+            {},
+            function(data, status) {
+                onSelect(data, status);
+            });
+    }
 
     $(document).ready(function(){
     $("#btn_add").click(function() {
@@ -306,21 +325,7 @@
                 createtime: $("#createtime_input").val()
             },
             function(data, status) {
-                var error_code = data.error_code;
-                if(error_code == "0") {
-                    clearContent();
-                    for (var i=0; i<data.record_list.length;i++) {
-                        var id_req = data.record_list[i].id;
-                        var msg_req = data.record_list[i].msg;
-                        var url_req = data.record_list[i].url;
-                        var type_req = data.record_list[i].type;
-                        var creator_req = data.record_list[i].creator;
-                        var createtime_req = data.record_list[i].createtime;
-                        addToContent(id_req, msg_req, url_req, type_req, creator_req, createtime_req);
-                    }
-                } else {
-                    alert(error_code);
-                }
+                onSelect(data, status);
             });
         });
     });
