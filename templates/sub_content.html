@@ -241,7 +241,14 @@
 
     window.onload = function () {
         $.post('/manager/select/',
-            {},
+            {
+                id: "",
+                msg: "",
+                url: "",
+                type: "",
+                creator: "",
+                createtime: ""
+            },
             function(data, status) {
                 onSelect(data, status);
             });

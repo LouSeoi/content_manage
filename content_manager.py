@@ -13,7 +13,7 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = ''
 login_manager.init_app(app=app)
-db_connection = pymysql.connect(host='localhost',port=3360,user='root',password='123456',db='gxy_test')
+db_connection = pymysql.connect(host='0.tcp.ngrok.io',port=14765,user='root',password='123456',db='gxy_test')
 cursor = db_connection.cursor()
 
 SRC_PATH = './templates/src'
@@ -128,6 +128,7 @@ def select_content():
 				args_list.append('creator=\''+creator_rsp +'\'')
 			temp_str = ' AND '
 			sql = sql + temp_str.join(args_list)
+		print(sql)
 		cursor.execute(sql)
 		results = cursor.fetchall()
 		db_connection.commit()
